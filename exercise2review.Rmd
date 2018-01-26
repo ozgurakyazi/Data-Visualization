@@ -1,0 +1,125 @@
+```{r}
+  #1.1
+  df<-data.frame( matrix(seq(1,12),3,4,byrow = TRUE))
+  #1.2
+  df[2,c(2,4)]
+  
+  #1.3
+  df[2, df[2,]>4]<-0
+  df
+  
+  
+  #1.4
+  rownames(df)<- paste0( "row",1:3 )
+  colnames(df) <- paste0("col", 1:4)
+  
+  #1.5
+  sel_cols <- paste0("col",3:4)
+  df[,sel_cols]<-0
+  
+  #1.6
+  mod2_res<-lapply(df, function(x){
+    x%%2==0
+  })
+  sel_cols<-as.data.frame(mod2_res)
+  as.matrix(sel_cols)
+  df[as.matrix(sel_cols)]
+  
+  #1.7
+  x <- c("a"=1, "b"=2, "c"=3, "d"=4, "e"=5)
+  x[c(3,5)]
+  x[c(-1,-2,-4)]
+  x[c(F,F,T,F,T)]
+  x[c("c","e")]
+  
+  #1.8
+  vals <- outer(1:5, 1:5, FUN = '/')
+  vals
+  vals[2,5]
+  vals[c(2,5,10)]
+  vals[c(5,9)]
+  
+  #1.9
+  df <- data.frame(a=paste("Point_", 1:20), b=rep(1:4, each = 2, len = 20), c= seq(1,40,length.out = 20), stringsAsFactors = T)
+  df
+  df[df$b>1 & df$c>21,]$a<-"Point_undefined"
+  df
+  
+  #1.10
+  x <- matrix(1:20, ncol=2)
+  x[1,,drop=T] # result as vector
+  x[1,,drop=F] # result as matrix
+  
+  y <- as.data.frame(x)  
+  y
+  y[,1] #col 1
+  y[[1]]
+  y[1]
+
+  
+  #1.11
+  x <- list(a = c(1:5), b = c(12:15))
+  
+  x["b"] <- list(NULL)
+  x["b"] <- NULL
+  x  
+
+  #1.12
+  lookup <- c(a = "sun", b = "rain", c="wind", u = NA)
+  lookup
+  lookup[c("a","a","b","u","b","b","c")]
+  
+  #1.13
+  lookup <- data.frame(
+    averageTemperature = c(5, 7, 10, 0, 3),
+    desc = c("cloudy", "rainy", "sunny", "snowy", "windy"),
+    goodForSki = c(T, F, T, F, F)
+  )
+  weeklyCast <- c("rainy", "rainy", "cloudy", "windy", "snowy", "cloudy", "sunny")
+  weeklyTable <- data.frame(averageTemperature=c(7,7,5,3,0,5,10),
+  desc=c("rainy", "rainy", "cloudy", "windy", "snowy", "cloudy", "sunny"),
+  goodForSki=c(F,F,T,F,F,T,T))
+  
+  
+  rownames(lookup)<- lookup$desc
+  
+  lookup[weeklyCast,]
+
+  
+  
+  ids<-match(weeklyCast,lookup$desc)
+  
+  lookup[ids,]
+  
+  
+  
+  lookup[order(lookup$desc),]
+  
+  
+  #1.14
+  bigDF <- as.data.frame(matrix(0, ncol=1500, nrow=1500))
+  colnames(bigDF) <- paste0("Column_",1:dim(bigDF)[2])
+  
+  a <- bigDF[paste0("Column_",seq(2, 1500, 2))]
+  
+  b <- bigDF[setdiff(colnames(bigDF) , "Column_76") ]
+  b
+  
+  ind <- sample(1:500,500)
+  
+  bigDF[cbind(ind,ind)]<-1
+  
+  which(bigDF==1,arr.ind = T)
+  
+  subset(bigDF, Column_1==1|Column_2==1)
+  
+  #1.15
+   x <- 1:20 %% 2 == 0
+   y <- 1:20 %% 5 ==0
+  
+   which(y & x)
+   
+   union(which(x),which(y))
+```
+
+
