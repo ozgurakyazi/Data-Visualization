@@ -1,0 +1,92 @@
+```{r}
+
+library(data.table)
+
+tmp_tidy_table <- "1_colname,2_colname,3_colname
+3,4,5
+a,b,c"
+
+#1.1
+table_m<-read.csv(text = tmp_tidy_table,check.names = F)
+table_m
+tmp_tidy_table
+
+#1.2
+tmp_messy_table <- "# This line is just useless info
+1_colname,2_colname,3_colname
+3,4,5
+a,b,c"
+
+messy_csv<- read.csv(text=tmp_messy_table,comment.char = "#",check.names = F)
+
+identical(messy_csv,table_m)
+
+#1.3
+holl<-fread("~/extdata/hollywood.tsv")
+holl
+file_holly_tab <- "~/extdata/hollywood.tsv"
+holly= as.data.table(read.delim(file_holly_tab), keep.rownames=T)
+holly
+
+aha<- as.data.table(read.delim(file_holly_tab),keep.rownames = T)
+
+holly_cn <- c("ID", colnames(aha)[-1])
+setnames(aha,holly_cn)
+aha
+
+#1.4
+tita<-as.data.table( read.csv("~/extdata/titanic.csv"))
+tita
+max_age<-max(subset(tita, survived==1 )$age,na.rm = T)
+tita[age==max_age,]$name
+
+#OR 
+subset(tita,survived==1 & age==max(age,na.rm = T))
+```
+
+##Q2
+```{r}
+library(readxl)
+
+poke_path <- "~/extdata/pokemon.xlsx"
+pokemon<-as.data.table(read_xlsx(path= poke_path, sheet = "Pokemon", range = "B1:D11"))
+pokemon
+
+#2.2
+med_path <- "~/extdata/summer_olympic_medals.xlsx"
+
+medals<-as.data.table( read_xlsx(path=med_path, sheet = "ALL MEDALISTS"))
+
+bronze <-medals[Medal=="Bronze", ]
+
+bronze[, N:=.N, by=Athlete]
+
+bronze[N==max(N),unique(Athlete)]
+
+
+#2.3
+medals[Gender=="Men" & Event_gender=="W"]
+
+medals[Gender=="Women" & Event_gender=="M"]
+
+#2.4
+med_count<-as.data.table( read_xlsx(med_path, sheet="COUNTRY TOTALS", range="A147:F286"))
+
+colnames( med_count) <- c(colnames(med_count)[-6], "Grand")
+
+med_count<- med_count[NOC != "Grand Total",]
+med_count
+med_count[Grand==max(Grand,na.rm = T)]
+
+med_count[, sil_rat:=Silver/Grand ]
+med_count
+med_count[sil_rat==max(sil_rat,na.rm = T),]
+```
+
+#Q3
+```{r}
+#3.1
+install.packages("XML")
+require(XML)
+```
+
