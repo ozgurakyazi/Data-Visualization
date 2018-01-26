@@ -86,7 +86,15 @@ med_count[sil_rat==max(sil_rat,na.rm = T),]
 #Q3
 ```{r}
 #3.1
-install.packages("XML")
 require(XML)
+
+doc = xmlTreeParse("~/extdata/plant_catalog.xml", useInternal = TRUE)
+
+root <- xmlRoot(doc)
+unique(unlist( xpathApply(doc, "//*",xmlName) ))
+
+#3.2
+xpathApply(doc,"//PLANT[ZONE=4]",xmlToList)
+
 ```
 
