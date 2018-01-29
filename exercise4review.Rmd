@@ -57,15 +57,89 @@ colMax(poke_dt,stats)
 
 #2.5
 which_max <- function(x){
-  which(x==max(x))  
+  which(x==max(x, na.rm = T))  
 }
 which_min <- function(x){
-  which(x==min(x))  
+  which(x==min(x,na.rm = T))  
 }
 
 #2.6
 poke_dt[ , .SD[which_max(Total)], by=Type]
 poke_dt[ , .SD[which_min(Total)], by=Type]
 poke_dt[, .SD[1], by=Type]
+
+#2.7
+
+(setorder( poke_dt[, .(av_total = mean(Total)), by = Type ], -av_total))
 ```
+
+#Q3
+```{r}
+#3.1
+colnames(evolution_dt)[1:2] <- c("Name", "Evolution")
+colnames(evolution_dt)
+
+head(evolution_dt)
+summary(evolution_dt)
+
+evolution_dt<- subset(evolution_dt, Name %in% poke_dt$Name)
+
+head(evolution_dt)
+
+#3.2
+subset(evolution_dt, ! Name %in% Evolution)
+
+#3.3
+poke_merge<-merge(poke_dt ,  evolution_dt[,.(Name,Evolution,Level)], by="Name",all.x = T)
+
+#3.4
+poke_merge[, .SD[which_max(Level)], by=Type]
+
+#3.5
+setnames(moves_dt,c("Cat.","Acc.","Prob. (%)"),c("Category","Accuracy","Probability"))
+colnames(moves_dt)
+
+moves_dt[, Accuracy:=as.numeric(Accuracy)]
+
+#3.6
+moves_dt[,unique(Category)]
+
+#3.7
+moves_dt[Type=="GRASS",]
+
+#3.8
+moves_dt[Type %in%poke_dt[Name=="Bulbasaur",]$Type]
+moves_dt
+#3.9
+moves_dt[, real_pow := Power*Accuracy]
+moves_dt[which_max(real_pow),]
+moves_dt[, .SD[which_max(real_pow)],by=.(Accuracy,Type) ]
+
+#3.10
+head(typeChart_dt,50)
+typeChart_dt[Attack=="FAIRY" & Multiplier>1]
+
+#3.11
+(setorder( typeChart_dt[, .(Attack_eff = sum(Multiplier,na.rm = T)), by=Attack], Attack_eff))
+
+(setorder( typeChart_dt[, .(Defense_eff= sum(Multiplier,na.rm = T)), by=Defense], Defense_eff))
+
+poke_name <- "Gastly"
+poke_name2 <- "Pikachu"
+poke_dt
+poke_types<-poke_dt[Name==poke_name,Type]
+poke_types2<-poke_dt[Name==poke_name2,Type][1]
+moves_dt[Type %in% poke_types ,] 
+
+attacks <-moves_dt[Type %in% poke_types ,]
+mult <- typeChart_dt[Attack %in% poke_types & Defense == poke_types2,]
+setnames(mult, "Attack", "Type")
+attacks <-merge( attacks ,mult[,.(Type, Multiplier)],by="Type")
+attacks
+attacks[, power_mult:= real_pow*Multiplier]
+attacks[which_max(power_mult)]
+typeChart_dt
+```
+
+
 
