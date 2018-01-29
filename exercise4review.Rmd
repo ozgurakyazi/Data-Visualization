@@ -1,0 +1,71 @@
+#Setup
+```{r}
+
+library(data.table)
+library(magrittr)
+
+library(tidyr)
+library(readxl)
+library(dplyr)
+library(dtplyr)
+```
+
+
+```{r}
+poke_dt<-as.data.table( read_xlsx("~/extdata/pokemon.xlsx", sheet = "Pokemon"))
+
+moves_dt<-as.data.table( read_xlsx("~/extdata/pokemon.xlsx", sheet = "Moves"))
+evolution_dt<-as.data.table( read_xlsx("~/extdata/pokemon.xlsx", sheet = "Evolution"))
+typeChart_dt<-as.data.table( read_xlsx("~/extdata/pokemon.xlsx", sheet = "TypeChart"))
+
+colnames(poke_dt)[1]<-"Number"
+colnames(poke_dt)
+colnames(poke_dt)<-gsub(" ","_",colnames(poke_dt))
+#Q1.3
+
+poke_dt[, Number:=gsub(intToUtf8(160), "",Number)]
+poke_dt[, Number:= as.integer(Number)]
+poke_dt[, Type := as.factor(Type)]
+
+poke_dt<-poke_dt[!grep("Mega",Name),]
+
+poke_dt<-subset(poke_dt, Number<=150 & Number>=1)
+
+```
+
+#Q2
+```{r}
+#2.1
+poke_dt[, unique(Type)]
+poke_dt[, .N , by=Type]
+
+#2.2
+poke_dt[Type=="ICE"]
+
+#2.3
+stats <- c("HP", "Attack", "Defense", "Special_Attack", "Special_Defense", "Speed", "Total")
+stopifnot(all(stats %in% names(poke_dt)))
+
+poke_dt[ , sapply(.SD, max), .SDcols=stats]
+
+#2.4
+colMax <- function(dt , colNames){
+  dt[,sapply(.SD, max), .SDcols=colNames]
+}
+
+colMax(poke_dt,stats)
+
+#2.5
+which_max <- function(x){
+  which(x==max(x))  
+}
+which_min <- function(x){
+  which(x==min(x))  
+}
+
+#2.6
+poke_dt[ , .SD[which_max(Total)], by=Type]
+poke_dt[ , .SD[which_min(Total)], by=Type]
+poke_dt[, .SD[1], by=Type]
+```
+
