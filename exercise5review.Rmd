@@ -1,0 +1,70 @@
+
+## Libraries
+```{r}
+library(data.table)
+library(magrittr)
+library(tidyr)
+
+```
+
+
+#Q1-Q2
+```{r}
+messy_file <- file.path('~/extdata', 'example_product_data.csv')
+messy_dt <- fread(messy_file)
+messy_dt
+#the data should not have values in the columns. They should be just variables. so the data should have columns Name, Product and Value
+
+messy_dt<-melt(messy_dt, id.vars = "name", measure.vars = c("producta","productb"), value.name = "value", variable.name = "product")
+
+messy_dt[, product:= gsub("product","",product)]
+messy_dt[, product:= as.factor(product)]
+
+messy_dt
+
+```
+
+
+#Q3-Q4
+```{r}
+weather_dt<-fread("~/extdata/weather.txt")
+head(weather_dt)
+weather_dt<-melt(weather_dt,id.vars = c("id","year","month","element"), variable.name = "day", value.name = "value")
+weather_dt[, day:= gsub("d","",day)]
+weather_dt
+
+files <- list.files("~/extdata/baby-names", full.names = TRUE)
+read_append <- function(file) {
+  dt <- fread(file)
+  dt[, filename := basename(file)]
+  return(dt)
+}
+
+dt <-lapply(files, read_append)%>% rbindlist %>% separate(col="filename", into=c("age","sex"), extra = "drop") ;
+
+View(dt)
+```
+
+
+#Q5-Q6-Q7
+```{r}
+org_dt <- fread("~/extdata/gene_expression.tds")
+dim(org_dt)
+View(org_dt)
+melted<-melt(org_dt, id.vars = c("GID","YORF","NAME","GWEIGHT"), variable.name = "nut_and_growth", value.name = "expression")
+
+seped<-separate(melted, "nut_and_growth",c("nutritient", "rate"),sep=1, convert=T)
+
+final_dt<- separate(seped,"NAME",c("name", "biological_process","molecular_function","systematic_name","other" ), sep="\\|\\|")
+
+final_dt
+```
+
+
+
+```{r}
+all_in_once<-melt(org_dt,id.vars = c("GID","YORF","NAME","GWEIGHT"), variable.name = "nut_and_growth", value="expression")%>%
+  separate("nut_and_growth", c("nutrient","growth_rat"),sep=1) %>%
+  separate("NAME",c("name","biological_process","molecular_function","systematic_name","other" ), sep="\\|\\|")
+```
+
