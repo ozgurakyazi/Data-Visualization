@@ -1,0 +1,103 @@
+
+#Libraries
+```{r}
+#start-->20:47
+library(ggplot2)
+library(data.table)
+library(magrittr)
+# Needed for %>% operator
+library(tidyr)
+library(ggbeeswarm)
+```
+
+#Q1
+1. shows distribution and quantiles, especially useful when comparing distributions. --> box plot
+2. highlights individual values, supports comparison and can show rankings or deviations categories and totals --> bar chart
+3. shows overall changes and patterns, usually over intervals of time--> line chart
+4. shows relationship between two continues variables.--> scatter plot
+
+#Q2
+```{r}
+iris_dt<-as.data.table( iris)
+
+dim(iris_dt)
+head(iris_dt)
+
+```
+
+#Q3
+```{r}
+iris_melt <- melt(iris_dt, id.vars = "Species")
+iris_melt
+ggplot(iris_melt, aes(x=value) ) + geom_histogram()+ facet_wrap(~variable) + theme_bw()
+```
+
+#Q4
+```{r}
+ggplot(iris_melt, aes(x=value) ) + geom_histogram(bins = 20)+ facet_wrap(~variable) + theme_bw()
+```
+
+#Q5
+```{r}
+box_visual<-ggplot(iris_melt, aes(x=variable,y=value )) + theme_bw()
+box_visual + geom_boxplot()
+box_visual + geom_boxplot() +geom_jitter(alpha=0.3)
+box_visual + geom_violin() +geom_jitter(alpha=0.3)
+box_visual + geom_beeswarm(aes(color=Species))
+```
+
+#Q6
+```{r}
+#6.1
+iris_dt
+ggplot(iris_dt, aes(x=Petal.Length, y=Petal.Width,color=Species) )+ geom_point() + theme_bw() +labs(x="Petal Length", y="Petal With", title="Relationship Between Petal Length and Width")
+```
+
+#Q7
+```{r}
+anscombe_reshaped<-anscombe %>%
+as.data.table %>%
+.[, ID := seq(nrow(.))] %>%
+melt(id.var=c("ID")) %>%
+separate(variable, c('xy', 'group'), sep=1) %>%
+  dcast(... ~ xy) %>% .[, group := paste0("dataset_", group)]
+
+summary(anscombe_reshaped)
+anscombe_reshaped[, .(y_std = sd(y), x_std=sd(x))]
+
+anscombe_reshaped[, group:=as.factor(group)]
+#7.2
+anscombe_reshaped[, .(corr=cor(x,y)), by=group]
+
+#7.3
+ggplot(anscombe_reshaped, aes(x=x, y=y)) + geom_point() + facet_wrap(~group)
+```
+
+
+#Q8
+```{r}
+## copy-pasted code
+mtcars <- data.table(mtcars)
+## First compute median
+mtcars[, medians := median(mpg), by = cyl]
+## Quantiles
+mtcars[, c("lq", "uq") := .(quantile(mpg, 0.25), quantile(mpg, 0.75)), by = cyl]
+## Whiskers
+mtcars[, IQR := 1.5 * IQR(mpg), by = cyl]
+mtcars[, c("up_IQR", "down_IQR") := .(IQR + uq, lq - IQR)]
+## Get the most extreme value within 1.5*IQR
+mtcars[mpg < up_IQR,
+up_whisker := max(mpg),
+by = "cyl"]
+mtcars[mpg > down_IQR,
+down_whisker := min(mpg),
+by = "cyl"]
+## Compute outliers
+mtcars[, outlier := (mpg < down_IQR | mpg > up_IQR), by = 'cyl']
+ggplot(mtcars, aes(cyl, medians, ymax = uq, ymin = lq)) +
+geom_crossbar(fill = 'white', width = 1.3) +
+geom_segment(aes(cyl, down_whisker, xend = cyl, yend = lq)) +
+geom_segment(aes(cyl, uq, xend = cyl, yend = up_whisker)) +
+geom_point(data = mtcars[outlier == TRUE], aes(cyl, mpg))
+```
+
