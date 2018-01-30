@@ -1,0 +1,87 @@
+
+#Libs
+```{r}
+library(ggplot2)
+library(data.table)
+library(magrittr)
+# Needed for %>% operator
+library(tidyr)
+library(plotly)
+install.packages("GGally")
+library(GGally)
+```
+
+
+#Q2
+```{r}
+#2
+dt <- data.table(pro_uptake = c(
+rnorm(3, 10100, 300), rnorm(4, 12100, 300), rnorm(3, 9850, 300),
+rnorm(4, 11100, 300), rnorm(4,8300, 300), rnorm(3,10050, 300),
+rnorm(3, 12000, 300), rnorm(3, 10020, 300), rnorm(3, 10080, 300), rnorm(3, 10070, 300)
+),
+mutants = c(rep('WT',3), rep('T49A',4), rep('K227N',3), rep('A400V',4), rep('L421P',4),
+rep('I500T',3), rep('N591D',3), rep('A601T',3), rep('E684D',3), rep('G710R',3) )
+)
+dt
+dt[, medians:= median(pro_uptake), by=mutants]
+dt<-dt[order(medians)]
+dt[, mutants:=factor(mutants, levels= dt[order(medians),mutants] )]
+dt
+wt_med <- dt[mutants=="WT",medians][1]
+wt_med
+dt[mutants!="WT"&medians>wt_med, colm:=1 ]
+dt[mutants!="WT"&medians<wt_med, colm:=2 ]
+dt[mutants=="WT", colm:=0]
+dt[, colm:=as.factor(colm)]
+dt
+ggplot(dt, aes(mutants, pro_uptake,fill=colm) )+
+  geom_boxplot()+
+  geom_jitter(width = 1.3)+
+  labs(y="Pro")
+```
+
+#Q3
+```{r}
+tit_dt <- fread("~/extdata/titanic.csv")
+tit_dt[, pclass:= as.factor(pclass)]
+tit_dt[, survived:= as.factor(survived)]
+
+ggplot(tit_dt, aes(survived)) +
+  geom_bar()
+
+ggplot(tit_dt, aes(x=pclass, fill=survived) )+
+  geom_bar(position="fill")
+
+ggplot(tit_dt, aes(x=survived, y=age) )+
+  geom_violin()+
+  geom_jitter(width = 0.3,alpha=0.3)
+
+ggplot(tit_dt, aes(x=survived, y=age) )+
+  geom_violin()+
+  geom_jitter(width = 0.3,alpha=0.3)+
+  facet_wrap(~sex)
+
+ggplot(tit_dt, aes(x=survived, y=age) )+
+  geom_violin()+
+  geom_jitter(width = 0.3,alpha=0.3)+
+  facet_wrap(~pclass)
+```
+
+#Q4
+```{r}
+cof_dt <- fread("~/extdata/coffee.csv")
+cof_dt[,cups:=as.factor(cups)]
+cof_dt[, packs:=as.factor(packs)]
+cof_dt
+ggplot(cof_dt, aes(x=cups, y=coffee_risk_margin) )+
+  geom_bar(stat="identity")
+
+ggplot(cof_dt, aes(x=packs, y=cig_risk_margin) )+
+  geom_bar(stat="identity")
+
+
+ggplot(cof_dt, aes(x=packs, y=risk, fill=cups) )+
+  geom_bar(position = "dodge",stat = "identity")
+```
+
